@@ -5,6 +5,6 @@ crawls trough currently discounted games in playstation store and dispatches the
 Create a .env file with playstation domain and deals page as start url.
 
 - `go run main.go`
-or
+<br> OR <br>
 - `docker build -t ps_crawler .`
 - `docker run --env-file=.env ps_crawler`
