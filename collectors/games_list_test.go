@@ -50,7 +50,7 @@ func TestGamesListOnHTML(t *testing.T) {
 
 	mockColly := mockColly{}
 	mc := mockCrawler{}
-	gameCrawler := gameCrawler{&mockColly, "", out, func(s string, c chan Game) Crawler { return &mc }}
+	gameCrawler := gameCrawler{&mockColly, "", out, func(s string, c chan Game) Crawler { return &mc }, 2}
 
 	hadGames = false
 
@@ -66,7 +66,7 @@ func TestGameListTick(t *testing.T) {
 
 	mockColly := mockColly{}
 	mc := mockCrawler{}
-	gameCrawler := gameCrawler{&mockColly, "", out, func(s string, c chan Game) Crawler { return &mc }}
+	gameCrawler := gameCrawler{&mockColly, "", out, func(s string, c chan Game) Crawler { return &mc }, 2}
 
 	path := "https://store.playstation.com/en-sk/category/322ea58b-1a57-4586-93e0-286d1e926394/2"
 	nextPath := "https://store.playstation.com/en-sk/category/322ea58b-1a57-4586-93e0-286d1e926394/3"

@@ -3,6 +3,7 @@ package collectors
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/rs/zerolog/log"
 
@@ -44,7 +45,11 @@ func CreateDealCollector(out chan Game) DealCollector {
 	domain := os.Getenv("DOMAIN")
 	c := colly.NewCollector(colly.AllowedDomains(domain))
 
-	gameCrawler := createGameCrawler(domain, out)
+	maxPages, err := strconv.Atoi(os.Getenv("MAX_PAGES"))
+	if err != nil {
+		maxPages = 0
+	}
+	gameCrawler := createGameCrawler(domain, out, maxPages)
 
 	dealCollector := DealCollector{mainCollector: c, gameCrawler: &gameCrawler, startUrl: "https://" + domain + dealsUrl}
 

@@ -15,6 +15,7 @@ type gameCrawler struct {
 	domain              string
 	out                 chan Game
 	createGameCollector gameCollectorConstructor
+	maxPages            int
 }
 
 var hadGames = true
@@ -25,7 +26,7 @@ func (g *gameCrawler) Visit(path string) {
 	visits := 0
 	var err error
 
-	for hadGames && visits < 3 {
+	for hadGames && (g.maxPages < 1 || visits < g.maxPages) {
 		hadGames = false
 		path, err = g.tick(path)
 		if err != nil {
@@ -83,12 +84,12 @@ func getNextPath(path string) (string, error) {
 	return nextPath, nil
 }
 
-func createGameCrawler(domain string, out chan Game) gameCrawler {
+func createGameCrawler(domain string, out chan Game, maxPages int) gameCrawler {
 	c := colly.NewCollector(colly.AllowedDomains(domain), colly.Async(true))
 	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 2})
 
 	createGameCollector := func(domain string, out chan Game) Crawler { return createGameCollector(domain, out) }
-	collector := gameCrawler{c, domain, out, createGameCollector}
+	collector := gameCrawler{c, domain, out, createGameCollector, maxPages}
 
 	c.OnHTML("main ul li a", collector.onHtml)
 
