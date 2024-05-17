@@ -17,15 +17,20 @@ func main() {
 	log.Info().Msg("Starting")
 	out := make(chan collectors.Game)
 
+	dispatcher, err := dispatcher.CreateDispatcher()
+	if err != nil {
+		return
+	}
+
 	go func() {
 		dealCollector := collectors.CreateDealCollector(out)
 		dealCollector.Start()
 	}()
 
-	dispatcher := dispatcher.CreateDispatcher()
-
 	for v := range out {
 		dispatcher.Dispatch(v)
 	}
+
+	dispatcher.Close()
 	log.Info().Msg("Done")
 }
