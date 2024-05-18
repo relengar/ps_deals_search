@@ -2,7 +2,6 @@ package dispatcher
 
 import (
 	"encoding/json"
-	"os"
 
 	"github.com/nats-io/nats.go"
 	"github.com/rs/zerolog/log"
@@ -11,6 +10,12 @@ import (
 type queueClient interface {
 	Publish(string, []byte) error
 	Close()
+}
+
+type DispatcherConfig struct {
+	Url     string
+	Subject string
+	Token   string
 }
 
 type Dispatcher struct {
@@ -39,14 +44,12 @@ func (d *Dispatcher) Close() {
 	d.queue.Close()
 }
 
-func CreateDispatcher() (Dispatcher, error) {
-	url := os.Getenv("QUEUE_URL")
-	subject := os.Getenv("SUBJECT")
-	nc, err := nats.Connect(url)
+func CreateDispatcher(cfg DispatcherConfig) (Dispatcher, error) {
+	nc, err := nats.Connect(cfg.Url, nats.Token(cfg.Token))
 
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to establish nats connection")
 		return Dispatcher{}, err
 	}
-	return Dispatcher{nc, subject}, nil
+	return Dispatcher{nc, cfg.Subject}, nil
 }
