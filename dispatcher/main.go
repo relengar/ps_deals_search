@@ -8,6 +8,7 @@ import (
 type queueClient interface {
 	Publish(string, any) error
 	Close()
+	Drain() error
 }
 
 type DispatcherConfig struct {
@@ -33,6 +34,10 @@ func (d *Dispatcher) Dispatch(msg any) error {
 }
 
 func (d *Dispatcher) Close() {
+	err := d.queue.Drain()
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to drain connection before closing")
+	}
 	d.queue.Close()
 }
 
