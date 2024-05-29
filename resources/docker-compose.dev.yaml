@@ -8,7 +8,7 @@ services:
     command: "-c ./auth.conf --cluster_name NATS --cluster nats://0.0.0.0:6222 --http_port 8222 "
     networks: ["nats"]
     env_file: 
-      - ../.env
+      - .env
     volumes:
       - ./auth.conf:/auth.conf:ro
 
