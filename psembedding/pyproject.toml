@@ -1,0 +1,80 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "psembedding"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "andrej.delmar", email = "andrej.delmar@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "sentence-transformers>=2.7.0",
+  "python-dotenv",
+  "fastapi-slim[standard]",
+  "nats-py",
+  "structlog",
+]
+
+[project.urls]
+Documentation = "https://github.com/andrej.delmar/psembedding#readme"
+Issues = "https://github.com/andrej.delmar/psembedding/issues"
+Source = "https://github.com/andrej.delmar/psembedding"
+
+[tool.hatch.version]
+path = "src/psembedding/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+
+[tool.hatch.envs.default]
+path = ".hatch"
+
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/psembedding tests}"
+
+[tool.hatch.envs.default.scripts]
+start = "fastapi run src/psembedding/__main__.py"
+
+[tool.coverage.run]
+source_pkgs = ["psembedding", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/psembedding/__about__.py",
+]
+
+[tool.coverage.paths]
+psembedding = ["src/psembedding", "*/psembedding/src/psembedding"]
+tests = ["tests", "*/psembedding/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
+pythonpath = "src"
