@@ -12,4 +12,4 @@ You will need to have docker to create dependencies or use .env to adjust connec
 - Run crawler with `go run main.go`
 <br> OR <br>
 - `docker build -t ps_crawler .`
-- `docker run --env-file=.env ps_crawler`
+- `docker run --env-file=.env --net=host ps_crawler`

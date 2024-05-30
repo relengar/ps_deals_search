@@ -28,7 +28,7 @@ Is used to provide embedding inference from a trained model, which it downloads 
 
 ## Setup
 
-To establish environment variables you can create a `.env` file. See `.env.sample`.
+To establish environment variables you can create a `resources/.env` file. See `resources/.env.sample`.
 
 The dependencies can be initialized on local with docker.
 ```shell
