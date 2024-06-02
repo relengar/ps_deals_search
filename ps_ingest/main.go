@@ -4,7 +4,8 @@ import (
 	"os"
 	"os/signal"
 	"ps_ingest/http"
-	"ps_ingest/subscriber"
+	"ps_ingest/nats"
+	"ps_ingest/serialization"
 	"syscall"
 
 	"github.com/caarlos0/env/v11"
@@ -27,12 +28,31 @@ func main() {
 	stopChan := make(chan struct{}, 1)
 	out := make(chan any)
 
-	subCfg := subscriber.SubscriberConfig{Url: cfg.QueueUrl, Subject: cfg.QueueSubject, Token: cfg.QueueToken}
-	sub := subscriber.CreateSubscriber(out, subCfg)
-	err := sub.Subscribe()
+	natsCfg := nats.ConnectionConfig{Url: cfg.QueueUrl, Token: cfg.QueueToken}
+	natsClient := nats.CreateClient(natsCfg)
+	err := natsClient.Connect()
 	if err != nil {
 		return
 	}
+
+	serializerCfg := serialization.SerializerConfig{NatsClient: natsClient, NatsEncoderSubject: cfg.QueueSubject}
+	serializer := serialization.CreateSerializer(&serializerCfg)
+
+	err = natsClient.Subscribe(cfg.QueueSubject, func(v any) {
+		log.Info().Any("msg", v).Msg("Received message")
+		serializer.Serialize([]string{"meh"})
+	})
+	if err != nil {
+		natsClient.Close()
+		return
+	}
+
+	// subCfg := subscriber.SubscriberConfig{Url: cfg.QueueUrl, Subject: cfg.QueueSubject, Token: cfg.QueueToken, Services: encoder}
+	// sub := subscriber.CreateSubscriber(out, subCfg)
+	// err := sub.Subscribe()
+	// if err != nil {
+	// 	return
+	// }
 
 	// TODO: implement connector and transformation to some persistance layer
 	go func() {
@@ -47,7 +67,7 @@ func main() {
 
 	<-stopChan
 	// TODO: proper graceful exit
-	sub.Stop()
+	natsClient.Close()
 	log.Info().Msg("Exiting")
 
 }
