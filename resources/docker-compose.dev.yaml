@@ -11,6 +11,22 @@ services:
       - .env
     volumes:
       - ./auth.conf:/auth.conf:ro
+  postgres:
+    image: pgvector/pgvector:pg16
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    volumes:
+      - ./pg_init.sql:/docker-entrypoint-initdb.d/init.sql
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 5000:5000
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=some@one.com
+      - PGADMIN_DEFAULT_PASSWORD=password
+      - PGADMIN_LISTEN_PORT=5000
 
 networks:
   nats:

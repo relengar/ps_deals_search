@@ -5,6 +5,7 @@ import (
 	"os/signal"
 	"ps_ingest/http"
 	"ps_ingest/nats"
+	"ps_ingest/postgres"
 	"ps_ingest/serialization"
 	"syscall"
 
@@ -14,9 +15,14 @@ import (
 )
 
 type config struct {
-	QueueUrl     string `env:"QUEUE_URL,notEmpty"`
-	QueueSubject string `env:"QUEUE_SUBJECT,notEmpty"`
-	QueueToken   string `env:"QUEUE_TOKEN,notEmpty,unset"`
+	QueueUrl         string `env:"QUEUE_URL,notEmpty"`
+	QueueSubject     string `env:"QUEUE_SUBJECT,notEmpty"`
+	QueueToken       string `env:"QUEUE_TOKEN,notEmpty,unset"`
+	EmbeddingSubject string `env:"EMBEDDING_SUBJECT,notEmpty"`
+	PgUser           string `env:"PG_USER,notEmpty"`
+	PgPassword       string `env:"PG_PASSWORD,notEmpty,unset"`
+	PgHost           string `env:"PG_HOST,notEmpty"`
+	PgDatabase       string `env:"PG_DATABASE,notEmpty"`
 }
 
 func main() {
@@ -35,26 +41,24 @@ func main() {
 		return
 	}
 
-	serializerCfg := serialization.SerializerConfig{NatsClient: natsClient, NatsEncoderSubject: cfg.QueueSubject}
-	serializer := serialization.CreateSerializer(&serializerCfg)
-
-	err = natsClient.Subscribe(cfg.QueueSubject, func(v any) {
-		log.Info().Any("msg", v).Msg("Received message")
-		serializer.Serialize([]string{"meh"})
-	})
+	pgConfig := postgres.PgConfig{User: cfg.PgUser, Password: cfg.PgPassword, Host: cfg.PgHost, Database: cfg.PgDatabase}
+	pgClient := postgres.CreatePgClient(pgConfig)
+	err = pgClient.Connect()
 	if err != nil {
 		natsClient.Close()
 		return
 	}
 
-	// subCfg := subscriber.SubscriberConfig{Url: cfg.QueueUrl, Subject: cfg.QueueSubject, Token: cfg.QueueToken, Services: encoder}
-	// sub := subscriber.CreateSubscriber(out, subCfg)
-	// err := sub.Subscribe()
-	// if err != nil {
-	// 	return
-	// }
+	serializerCfg := serialization.SerializerConfig{NatsClient: natsClient, NatsEncoderSubject: cfg.EmbeddingSubject, PgClient: pgClient}
+	serializer := serialization.CreateSerializer(&serializerCfg)
 
-	// TODO: implement connector and transformation to some persistance layer
+	err = natsClient.Subscribe(cfg.QueueSubject, serializer.Serialize)
+	if err != nil {
+		pgClient.Close()
+		natsClient.Close()
+		return
+	}
+
 	go func() {
 		for v := range out {
 			log.Info().Any("msg", v).Msg("Got message from subscriber")
@@ -67,6 +71,7 @@ func main() {
 
 	<-stopChan
 	// TODO: proper graceful exit
+	pgClient.Close()
 	natsClient.Close()
 	log.Info().Msg("Exiting")
 
