@@ -16,6 +16,7 @@ Consumes games from crawler service and serilaizes them to database. Is dispatch
  - in `./ps_ingest` directory
  - Dependencies
     - [NATS](https://docs.nats.io/)
+    - [Postgres](https://www.postgresql.org/) with [pgvector](https://github.com/pgvector/pgvector) extension
     - [embedder service](#embedder)
 
 ### Embedder
@@ -37,3 +38,4 @@ docker compose -f resources/docker-compose.dev.yaml up -d
 
 Each service than has it's own setup with it's own `.env` file. It is important to keep the env variables such as tokens in sync. See respective `README.md` files for more info.
 
+You can open the pgAdmin on http://localhost:5000. For credentials see `resources/.env`
