@@ -44,10 +44,11 @@ class NatsSubscriber(NatsClient):
         # TODO: proper serialiation - pydantic
         payload = json.loads(msg.data.decode())
 
-        # TODO: Error handlign - try except, send ok: False
+        # TODO: Error handling - try except, send ok: False
         log = self.__log.bind(msg=payload)
         log.info("processing message")
-        res = self.__handler(payload["texts"])
+        res = self.__handler(payload)
 
         res_raw = json.dumps({"embeddings": res, "ok": True }).encode()
+        log.debug("sending embedding to nats")
         await msg.respond(res_raw)

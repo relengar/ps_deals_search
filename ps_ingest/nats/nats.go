@@ -24,7 +24,6 @@ type client struct {
 
 func (c *client) Connect() error {
 	conn, err := nats.Connect(c.url, nats.Token(c.token))
-
 	if err != nil {
 		log.Error().Err(err).Str("url", c.url).Msg("Failed to connect to nats")
 		return err
@@ -70,11 +69,11 @@ func (c *client) Request(subject string, payload any, resp any) error {
 
 	err := c.conn.Request(subject, payload, resp, 10*time.Second)
 	if err != nil {
-		log.Error().Err(err).Str("subject", subject).Any("payload", payload).Msg("Failed nats request")
-		return fmt.Errorf("Nats request failed")
+		return err
 	}
 
-	return nil
+	log.Debug().Any("resp", resp).Msg("Got msg")
+	return err
 }
 
 func (c *client) unsubscribe() error {
