@@ -38,4 +38,20 @@ docker compose -f resources/docker-compose.dev.yaml up -d
 
 Each service than has it's own setup with it's own `.env` file. It is important to keep the env variables such as tokens in sync. See respective `README.md` files for more info.
 
-You can open the pgAdmin on http://localhost:5000. For credentials see `resources/.env`
+### Notes
+You can open the pgAdmin on http://localhost:5000.
+
+*To login to pgAdmin see `resources/docker-compose.dev.yaml` for env variables which hold credentials*
+*In order to setup pgAdmin on local use `postgres` as host. For credentials see `resources/.env`*
+
+To see logs use (see `resources/docker-compose.dev.yaml` for service names):
+```shell
+docker compose -f resources/docker-compose.dev.yaml logs -f --tail 250 [service_name]
+```
+
+After you're done it's best to stop and cleanup the resources.
+```shell
+docker compose -f resources/docker-compose.dev.yaml down -v
+```
+
+There's not migration mechanism (yet). To update postgres schema see `resources/pg_init.sql`
