@@ -13,7 +13,8 @@ import (
 
 type PgClient interface {
 	Connect() error
-	InsertGame(game datatypes.Game, descEmbedding [][]float64) error
+	InsertGame(datatypes.Game) (int, error)
+	InsertGameEmbedding(int, []float64) error
 	Close()
 }
 
@@ -38,10 +39,11 @@ func (c *client) Connect() error {
 	return nil
 }
 
-func (c *client) InsertGame(game datatypes.Game, descEmbedding [][]float64) error {
-	_, err := c.db.Exec(`
-		INSERT INTO games (name, description, price, original_price, url, rating, rating_sum, expiration, description_embedding)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+func (c *client) InsertGame(game datatypes.Game) (int, error) {
+	resp, err := c.db.Query(`
+		INSERT INTO games (name, description, price, original_price, url, rating, rating_sum, expiration)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id
 	`,
 		game.Name,
 		game.Description,
@@ -51,8 +53,27 @@ func (c *client) InsertGame(game datatypes.Game, descEmbedding [][]float64) erro
 		game.Rating,
 		game.RatingsSum,
 		game.Expiration,
-		// TODO: remodel db to store whole description embedding
-		c.toVectorInput(descEmbedding[0]),
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	var respData int
+	resp.Next()
+	err = resp.Scan(&respData)
+
+	log.Logger.Info().Any("inserted", respData).Msg("Inserted")
+	return respData, err
+}
+
+func (c *client) InsertGameEmbedding(gameId int, description_embedding []float64) error {
+	_, err := c.db.Exec(`
+		INSERT INTO game_embeddings (game_id, embedding, property_name)
+		VALUES ($1, $2, $3)
+	`,
+		gameId,
+		c.toVectorInput(description_embedding),
+		"description",
 	)
 
 	return err

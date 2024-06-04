@@ -4,7 +4,6 @@ import (
 	datatypes "ps_ingest/dataTypes"
 	"ps_ingest/nats"
 	"ps_ingest/postgres"
-	"strings"
 
 	"github.com/rs/zerolog/log"
 )
@@ -14,28 +13,38 @@ type embeddingsResponse struct {
 	Embeddings [][]float64 `json:"embeddings"`
 }
 
-type embeddingPayload struct {
-	texts []string
-}
-
 type SerializerConfig struct {
 	NatsClient         nats.Client
 	NatsEncoderSubject string
 	PgClient           postgres.PgClient
 }
 
+type NatsClient interface {
+	Request(subject string, payload any, resp any) error
+}
+
+type PgClient interface {
+	InsertGame(datatypes.Game) (int, error)
+	InsertGameEmbedding(int, []float64) error
+}
+
 type Serializer struct {
-	natsClient         nats.Client
+	natsClient         NatsClient
 	natsEncoderSubject string
-	pgClient           postgres.PgClient
+	pgClient           PgClient
 }
 
 func (s *Serializer) Serialize(game datatypes.Game) {
 	errLog := log.Error().Any("game", game)
 	resp := embeddingsResponse{}
-	sentences := strings.Split(game.Description, ".")
 
-	err := s.natsClient.Request(s.natsEncoderSubject, sentences, &resp)
+	gameId, err := s.pgClient.InsertGame(game)
+	if err != nil {
+		errLog.Err(err).Msg("Failed to insert ps game to postgres")
+		return
+	}
+
+	err = s.natsClient.Request(s.natsEncoderSubject, []string{game.Description}, &resp)
 	if err != nil {
 		errLog.Err(err).Msg("Failed to retrieve encodings")
 		return
@@ -46,9 +55,10 @@ func (s *Serializer) Serialize(game datatypes.Game) {
 		return
 	}
 
-	err = s.pgClient.InsertGame(game, resp.Embeddings)
+	descriptionEmbedding := resp.Embeddings[0] // We've sent game description for embedding as first parameter
+	err = s.pgClient.InsertGameEmbedding(gameId, descriptionEmbedding)
 	if err != nil {
-		errLog.Err(err).Int("embeddings_length", len(resp.Embeddings)).Msg("Failed to insert ps game to postgres")
+		errLog.Err(err).Int("embedding_length", len(descriptionEmbedding)).Msg("Failed to insert game description embedding to db")
 	}
 }
 

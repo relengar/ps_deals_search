@@ -24,6 +24,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.1.0 // indirect
 	github.com/schollz/progressbar/v2 v2.15.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/sugarme/gotch v0.9.1 // indirect
 	github.com/sugarme/regexpset v0.0.0-20200920021344-4d4ec8eaf93c // indirect
 	github.com/sugarme/tokenizer v0.1.17 // indirect

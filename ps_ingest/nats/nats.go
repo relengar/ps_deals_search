@@ -72,7 +72,7 @@ func (c *client) Request(subject string, payload any, resp any) error {
 		return err
 	}
 
-	log.Debug().Any("resp", resp).Msg("Got msg")
+	log.Debug().Msg("Got embedder response")
 	return err
 }
 
