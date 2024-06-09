@@ -23,6 +23,7 @@ type config struct {
 	PgPassword       string `env:"PG_PASSWORD,notEmpty,unset"`
 	PgHost           string `env:"PG_HOST,notEmpty"`
 	PgDatabase       string `env:"PG_DATABASE,notEmpty"`
+	HTTPPort         int    `env:"PORT" envDefault:"8080"`
 }
 
 func main() {
@@ -65,7 +66,7 @@ func main() {
 		}
 	}()
 
-	go http.StartHealthz()
+	go http.StartHealthz(cfg.HTTPPort)
 
 	go onTerminate(stopChan)
 

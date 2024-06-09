@@ -2,6 +2,7 @@ package http
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -13,14 +14,15 @@ func healthzHanlder(w http.ResponseWriter, _ *http.Request) {
 	io.WriteString(w, "Ok")
 }
 
-func StartHealthz() error {
+func StartHealthz(port int) error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", healthzHanlder)
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%d", port),
 		Handler: mux,
 	}
 
+	log.Info().Int("port", port).Msg("Starting http server")
 	err := server.ListenAndServe()
 	if errors.Is(err, net.ErrClosed) {
 		log.Info().Msg("Server closed")
