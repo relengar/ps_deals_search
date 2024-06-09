@@ -12,9 +12,9 @@ import (
 type config struct {
 	Domain       string `env:"DOMAIN,notEmpty"`
 	MaxPages     int    `env:"MAX_PAGES" envDefault:"-1"`
-	QueueUrl     string `env:"QUEUE_URL,notEmpty"`
-	QueueSubject string `env:"QUEUE_SUBJECT,notEmpty"`
-	QueueToken   string `env:"QUEUE_TOKEN,notEmpty,unset"`
+	QueueUrl     string `env:"NATS_URL,notEmpty"`
+	QueueSubject string `env:"NATS_SUBJECT,notEmpty"`
+	QueueToken   string `env:"NATS_TOKEN,notEmpty,unset"`
 }
 
 func main() {

@@ -15,9 +15,9 @@ import (
 )
 
 type config struct {
-	QueueUrl         string `env:"QUEUE_URL,notEmpty"`
-	QueueSubject     string `env:"QUEUE_SUBJECT,notEmpty"`
-	QueueToken       string `env:"QUEUE_TOKEN,notEmpty,unset"`
+	QueueUrl         string `env:"NATS_URL,notEmpty"`
+	QueueSubject     string `env:"NATS_SUBJECT,notEmpty"`
+	QueueToken       string `env:"NATS_TOKEN,notEmpty,unset"`
 	EmbeddingSubject string `env:"EMBEDDING_SUBJECT,notEmpty"`
 	PgUser           string `env:"PG_USER,notEmpty"`
 	PgPassword       string `env:"PG_PASSWORD,notEmpty,unset"`
