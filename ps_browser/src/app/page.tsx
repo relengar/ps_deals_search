@@ -24,7 +24,7 @@ export default async function Search({
         if (term?.length === 0) {
             return;
         }
-        redirect(`search?term=${term}`);
+        redirect(`?term=${term}`);
     };
 
     return (
