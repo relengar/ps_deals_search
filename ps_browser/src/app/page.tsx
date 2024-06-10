@@ -1,4 +1,4 @@
-import { searchGames } from '@/lib/queries/searchGamesQuery';
+import { searchGames } from '@/lib/queries/searchGames';
 import { redirect } from 'next/navigation';
 
 type QueryParams = {
