@@ -10,6 +10,8 @@
     "test:unit": "vitest run"
   },
   "dependencies": {
+    "flowbite": "^2.3.0",
+    "flowbite-react": "^0.9.0",
     "kysely": "^0.27.3",
     "nats": "^2.26.0",
     "next": "14.2.3",

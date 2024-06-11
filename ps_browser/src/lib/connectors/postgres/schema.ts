@@ -1,6 +1,6 @@
-import {Selectable} from 'kysely'
+import { Selectable } from 'kysely';
 
-interface GamesTable {
+type GamesTable = {
     id: number;
     name: string;
     description: string;
@@ -10,9 +10,9 @@ interface GamesTable {
     rating: number;
     rating_sum: number;
     expiration: Date;
-}
+};
 
-export type Game = Selectable<GamesTable>
+export type Game = Selectable<GamesTable>;
 
 interface GameEcmbeddingsTable {
     id: number;
@@ -24,6 +24,6 @@ interface GameEcmbeddingsTable {
 export type GameEmbedding = Selectable<GameEcmbeddingsTable>;
 
 export interface Database {
-    games: GamesTable
-    game_embeddings: GameEcmbeddingsTable
-  }
+    games: GamesTable;
+    game_embeddings: GameEcmbeddingsTable;
+}

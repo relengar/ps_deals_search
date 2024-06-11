@@ -1,5 +1,8 @@
-import { searchGames } from '@/lib/queries/searchGames';
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
+import LoadingGames from './loading';
+import SearchGames from './search';
+import Button from '@/components/button';
 
 type QueryParams = {
     term?: string;
@@ -12,12 +15,6 @@ export default async function Search({
 }) {
     const { term } = searchParams;
 
-    let data: any[] | null = null;
-    if (term) {
-        const { games } = await searchGames({ term });
-        data = games;
-    }
-
     const goToTerm = async (form: FormData) => {
         'use server';
         const term = form.get('term')?.toString();
@@ -28,20 +25,28 @@ export default async function Search({
     };
 
     return (
-        <section>
-            <h3>Search</h3>
-            <div>
+        <section className="container mx-auto flex-col content-center">
+            <h2 className="text-center w-full text-3xl leading-loose p-10">
+                Search for deals
+            </h2>
+            <section>
                 <form action={goToTerm}>
-                    <input placeholder="Search" type="text" name="term" />
-                    <button>Search</button>
-                    <div>
-                        Searched for <span>{term}</span>
-                    </div>
-                    <div>
-                        {data && data.map((game) => <div>{game.name}</div>)}
+                    <div className="flex w-full mb-14 justify-evenly place-items-center">
+                        <input
+                            className="resize rounded-md center w-5/6 h-8"
+                            placeholder="Search"
+                            type="text"
+                            name="term"
+                        />
+
+                        <Button text={'Search'} />
                     </div>
                 </form>
-            </div>
+            </section>
+
+            <Suspense fallback={<LoadingGames />}>
+                <SearchGames term={term} />
+            </Suspense>
         </section>
     );
 }

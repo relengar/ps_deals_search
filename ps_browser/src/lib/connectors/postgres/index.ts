@@ -1,7 +1,7 @@
 import { Kysely, PostgresDialect, sql } from 'kysely';
 import { Database } from './schema';
 import { Pool } from 'pg';
-import { writeFileSync } from 'fs';
+import { setTimeout } from 'timers/promises';
 
 let client: PgClient;
 
