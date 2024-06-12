@@ -62,8 +62,12 @@ func (c *client) InsertGame(game datatypes.Game) (int, error) {
 	resp.Next()
 	err = resp.Scan(&respData)
 
+	if err != nil {
+		return respData, fmt.Errorf("on InsertGame %+v %w", game, err)
+	}
+
 	log.Logger.Info().Any("inserted", respData).Msg("Inserted")
-	return respData, err
+	return respData, nil
 }
 
 func (c *client) InsertGameEmbedding(gameId int, description_embedding []float64) error {

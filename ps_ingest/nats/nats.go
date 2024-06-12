@@ -1,6 +1,7 @@
 package nats
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -43,7 +44,7 @@ func (c *client) Connect() error {
 
 func (c *client) Subscribe(subject string, handler nats.Handler) error {
 	if c.conn == nil {
-		err := fmt.Errorf("Can' subscribe to before connection is established")
+		err := errors.New("can' subscribe to before connection is established")
 		log.Error().Err(err).Str("subject", subject).Str("url", c.url).Msg("Failed to subscribe to subject")
 		return err
 	}
@@ -51,7 +52,7 @@ func (c *client) Subscribe(subject string, handler nats.Handler) error {
 	sub, err := c.conn.Subscribe(subject, handler)
 	if err != nil {
 		log.Error().Err(err).Str("subject", subject).Str("url", c.url).Msg("Failed to subscribe to subject")
-		return err
+		return fmt.Errorf("subscribing to subject %s: %w", subject, err)
 	}
 
 	log.Info().Str("subject", subject).Msg("Subscribed")
@@ -62,7 +63,7 @@ func (c *client) Subscribe(subject string, handler nats.Handler) error {
 
 func (c *client) Request(subject string, payload any, resp any) error {
 	if c.conn == nil {
-		err := fmt.Errorf("Can' send request to before connection is established")
+		err := errors.New("can' send request to before connection is established")
 		log.Error().Err(err).Str("subject", subject).Str("url", c.url).Msg("Failed nats request")
 		return err
 	}
@@ -83,7 +84,7 @@ func (c *client) unsubscribe() error {
 
 	err := c.sub.Drain()
 	if err != nil {
-		return fmt.Errorf("Failed to process messages before unsubscribing %w", err)
+		return fmt.Errorf("failed to process messages before unsubscribing %w", err)
 	}
 
 	return nil
