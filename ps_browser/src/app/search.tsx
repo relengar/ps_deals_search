@@ -8,21 +8,16 @@ type SearchGamesParams = {
 };
 
 export default async function SearchGames({ term }: SearchGamesParams) {
-    let data: Game[] | null = null;
-    if (term && term.length > 0) {
-        const { games } = await searchGames({ term });
-        data = games;
-    }
+    const { games } = await searchGames({ term });
 
     return (
         <section className="container mx-auto space-y-10">
-            {data &&
-                data.map((game) => (
-                    // @ts-ignore
-                    <Fragment key={game.id}>
-                        <GameItem game={game} />
-                    </Fragment>
-                ))}
+            {games.map((game) => (
+                // @ts-ignore
+                <Fragment key={game.id}>
+                    <GameItem game={game} />
+                </Fragment>
+            ))}
         </section>
     );
 }
