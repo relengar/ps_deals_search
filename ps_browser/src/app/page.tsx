@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import LoadingGames from './loading';
 import SearchGames from './search';
 import Button from '@/components/button';
+import SearchIcon from '@/components/searchIcon';
 
 type QueryParams = {
     term?: string;
@@ -31,15 +32,19 @@ export default async function Search({
             </h2>
             <section>
                 <form action={goToTerm}>
-                    <div className="flex w-full mb-14 justify-evenly place-items-center">
+                    <div className="flex w-full mb-14 place-items-center justify-center gap-2">
                         <input
                             className="resize rounded-md center w-5/6 h-8"
                             placeholder="Search"
                             type="text"
                             name="term"
                         />
-
-                        <Button text={'Search'} />
+                        <Button
+                            className="p-0"
+                            children={
+                                <SearchIcon className="h-8 w-8 p-2 m-0.5" />
+                            }
+                        />
                     </div>
                 </form>
             </section>
