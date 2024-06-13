@@ -1,7 +1,7 @@
 import { Kysely, PostgresDialect, sql } from 'kysely';
 import { Database } from './schema';
 import { Pool } from 'pg';
-import { setTimeout } from 'timers/promises';
+import { logger } from '@/lib/logger';
 
 let client: PgClient;
 
@@ -43,6 +43,7 @@ class PgClient {
     }
 
     async close() {
+        logger.info('Closing postgres connection');
         await this.#db.destroy();
     }
 
@@ -75,11 +76,10 @@ class PgClient {
 
 export function getPgClient(): PgClient {
     if (client) {
-        console.log('cached pg');
         return client;
     }
 
-    console.log('new pg');
+    logger.info('Initializing pg client');
 
     client = new PgClient({
         user: process.env.POSTGRES_USER,

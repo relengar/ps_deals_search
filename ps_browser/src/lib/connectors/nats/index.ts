@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NatsConnection, connect } from 'nats';
 
 let client: NatsClient;
@@ -32,6 +33,7 @@ export class NatsClient {
             return;
         }
 
+        logger.info('Closing nats connection');
         await this.#nc.close();
     }
 
@@ -46,7 +48,7 @@ export class NatsClient {
         const resp: EmbeddingResponse = msg.json();
 
         if (!resp.ok) {
-            throw new Error('Embedding failed');
+            throw new Error('Embedder service failed to create embedding');
         }
 
         return resp.embeddings[0];
