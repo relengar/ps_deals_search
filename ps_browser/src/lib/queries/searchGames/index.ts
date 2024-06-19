@@ -1,3 +1,5 @@
+'use server';
+
 import { getNatsClient } from '@/lib/connectors/nats';
 import { getPgClient } from '@/lib/connectors/postgres';
 import { Game } from '../../connectors/postgres/schema';
@@ -6,12 +8,12 @@ import { logger } from '@/lib/logger';
 type OrderBy = 'price' | 'rating';
 type Order = 'ASC' | 'DESC';
 
-type SearchGameParams = {
+export type SearchGameParams = {
     term?: string;
     maxPrice?: number;
-    minPrice?: number;
     orderBy?: OrderBy;
     order?: Order;
+    useSemantic?: boolean;
 };
 
 interface PgClient {
@@ -46,7 +48,7 @@ export async function searchGamesQuery(
     logger.info({ term }, 'Retrieving game from db');
     const games = await pg.getGame({ embedding, filters: { maxPrice: 20 } });
 
-    return { games };
+    return games;
 }
 
 export const searchGames = async (params: SearchGameParams) => {

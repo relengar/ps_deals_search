@@ -1,4 +1,4 @@
-export default async function LoadingGames() {
+export default function Spinner() {
     return (
         <section className="container mx-auto">
             <svg
