@@ -9,6 +9,7 @@ const devEnvConfig: LoggerOptions = {
             colorize: true,
         },
     },
+    level: 'debug',
 };
 
 const config: LoggerOptions = {
