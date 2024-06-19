@@ -56,7 +56,6 @@ class PgClient {
     }
 
     logHandler(event: LogEvent) {
-        logger.info({ queries: this.#logQueries }, 'wtf');
         if (event.level === 'error') {
             logger.error(event.error, 'Postgres error');
         }
