@@ -3,6 +3,7 @@ const nextConfig = {
     experimental: {
         serverComponentsExternalPackages: ['pino'],
     },
+    output: 'standalone',
 };
 
 export default nextConfig;
