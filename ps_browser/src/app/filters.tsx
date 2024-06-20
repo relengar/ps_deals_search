@@ -34,7 +34,7 @@ export default function Filters(props: Props) {
         <>
             <div className="flex w-full mb-6 place-items-center justify-center gap-2">
                 <span className=" w-5/6"></span>
-                <a href="javascript:" onClick={toggleVisible}>
+                <a href="#" onClick={toggleVisible}>
                     <FiltersIcon on={visible} className="h-10 w-10 p-2 m-0.5" />
                 </a>
             </div>
