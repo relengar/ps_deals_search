@@ -1,9 +1,10 @@
 {
   "name": "ps_browser",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS='--inspect' next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -34,5 +35,11 @@
     "typescript": "^5",
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^1.6.0"
+  },
+  "volta": {
+    "node": "20.14.0"
+  },
+  "engines": {
+    "node": "^20.14.0"
   }
 }
