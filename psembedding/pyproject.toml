@@ -52,7 +52,7 @@ path = ".hatch"
 check = "mypy --install-types --non-interactive {args:src/psembedding tests}"
 
 [tool.hatch.envs.default.scripts]
-start = "fastapi run src/psembedding/__main__.py"
+start = "python3 -m psembedding"
 
 [tool.coverage.run]
 source_pkgs = ["psembedding", "tests"]

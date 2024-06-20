@@ -19,7 +19,7 @@ def __create_lifespan(deps: Dependeneies):
         yield
         log.info("Shutting down")
         await deps["nats"].close()
-        task.cancel()
+        task.done()
 
     return lifespan
 

@@ -35,7 +35,8 @@ class NatsSubscriber(NatsClient):
         self.sub = await self.conn.subscribe(subject=self.__cfg.get('subject'), cb=self.__on_message)
 
     async def close(self):
-        await self.sub.unsubscribe()
+        if self.sub:
+            await self.sub.unsubscribe()
         await self.conn.close()
 
     async def __on_message(self, msg: Msg):

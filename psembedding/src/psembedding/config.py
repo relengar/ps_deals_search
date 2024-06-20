@@ -8,6 +8,7 @@ class Config(TypedDict):
     nats_subject: str
     model_cache_dir: str
     model_name: str
+    port: int
 
 
 def load_config():
@@ -17,4 +18,5 @@ def load_config():
         nats_token=os.environ.get("NATS_TOKEN"),
         model_cache_dir=os.environ.get("MODEL_CACHE_DIR", "./.cache"),
         model_name=os.environ.get("MODEL_NAME", "sentence-transformers/all-MiniLM-L6-v2"),
+        port=int(os.environ.get('PORT', 8000))
     )
