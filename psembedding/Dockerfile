@@ -19,17 +19,14 @@ RUN adduser \
     --shell "/sbin/nologin" \
     --no-create-home \
     --uid "${UID}" \
-    embedder
+    embedder &&\
+    mkdir .cache && chown embedder .cache
 
 COPY ./pyproject.toml .
 RUN --mount=type=cache,target=/root/.cache/pip \
     python -m pip install hatch &&\
     hatch dep show requirements > ./requirements.txt &&\
     python -m pip install -r requirements.txt
-
-RUN mkdir .cache && chown embedder .cache & mkdir .tcache && chown embedder .tcache
-
-USER embedder
 
 COPY ./src .
 
