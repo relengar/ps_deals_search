@@ -10,6 +10,7 @@ type GamesTable = {
     rating: number;
     rating_sum: number;
     expiration: Date;
+    platforms: string;
 };
 
 export type Game = Selectable<GamesTable>;

@@ -2,11 +2,13 @@
 
 import Button from '@/components/button';
 import SearchIcon from '@/components/icons/searchIcon';
+import { Platform } from '@/lib/connectors/postgres';
 import { Game } from '@/lib/connectors/postgres/schema';
-import { searchGames } from '@/lib/queries/searchGames';
+import { SearchGameParams, searchGames } from '@/lib/queries/searchGames';
+import { parseArrayParam } from '@/lib/utils/url';
 import { ChangeEvent, useEffect, useReducer, useState } from 'react';
 import Spinner from '../components/spinner';
-import Filters, { FilterValues } from './filters';
+import Filters from './filters';
 import GamesList from './gamesList';
 import { goToSearch } from './redirectToSearch';
 
@@ -14,6 +16,7 @@ type UrlQuery = {
     term?: string;
     maxPrice?: string;
     useSemantic?: string;
+    platforms?: string;
 };
 
 export default function Search({ searchParams }: { searchParams: UrlQuery }) {
@@ -27,12 +30,18 @@ export default function Search({ searchParams }: { searchParams: UrlQuery }) {
         : defaultMaxPrice;
     const useSemantic = searchParams.useSemantic === 'true';
 
+    const platforms = parseArrayParam<Platform>(searchParams.platforms, [
+        'PS4',
+        'PS5',
+    ]);
+
     const [filters, dispatchFilters] = useReducer(FiltersReducer, {
         maxPrice,
         useSemantic,
+        platforms,
     });
 
-    const onFiltersChange = (changes: Partial<FilterValues>) => {
+    const onFiltersChange = (changes: Partial<SearchGameParams>) => {
         dispatchFilters(changes);
     };
 
@@ -56,7 +65,7 @@ export default function Search({ searchParams }: { searchParams: UrlQuery }) {
         };
 
         getGames();
-    }, [searchParams.term]);
+    }, [searchParams]);
 
     return (
         <section className="container mx-auto flex-col content-center">
@@ -81,8 +90,7 @@ export default function Search({ searchParams }: { searchParams: UrlQuery }) {
                         </div>
                         <Filters
                             term={term}
-                            maxPrice={maxPrice}
-                            useSemantic={useSemantic}
+                            {...filters}
                             onChange={onFiltersChange}
                         />
                     </div>
@@ -95,8 +103,8 @@ export default function Search({ searchParams }: { searchParams: UrlQuery }) {
 }
 
 function FiltersReducer(
-    filters: FilterValues,
-    changes: Partial<FilterValues>
-): FilterValues {
+    filters: SearchGameParams,
+    changes: Partial<SearchGameParams>
+): SearchGameParams {
     return { ...filters, ...changes };
 }

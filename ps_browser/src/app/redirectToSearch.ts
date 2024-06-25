@@ -1,8 +1,9 @@
 'use server';
-import { headers } from 'next/headers';
 import { logger } from '@/lib/logger';
-import { redirect } from 'next/navigation';
 import { SearchGameParams } from '@/lib/queries/searchGames';
+import { toQueryString } from '@/lib/utils/url';
+import { headers } from 'next/headers';
+import { RedirectType, redirect } from 'next/navigation';
 
 export async function goToSearch(filters: SearchGameParams) {
     logger.debug({ form: filters }, 'Searching');
@@ -11,15 +12,5 @@ export async function goToSearch(filters: SearchGameParams) {
     nextUrl.search = toQueryString(filters);
 
     logger.debug({ nextUrl }, 'Redirecting to new search');
-    redirect(nextUrl.href);
-}
-
-function toQueryString(filters: SearchGameParams): string {
-    const params = new URLSearchParams();
-
-    for (const [attr, value] of Object.entries(filters)) {
-        params.set(attr, value.toString());
-    }
-
-    return params.toString();
+    redirect(nextUrl.href, RedirectType.replace);
 }

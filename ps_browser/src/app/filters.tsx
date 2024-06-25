@@ -1,15 +1,12 @@
 import { FiltersIcon } from '@/components/icons/filtersIcon';
+import type { Platform } from '@/lib/connectors/postgres';
+import { SearchGameParams } from '@/lib/queries/searchGames';
 import { ChangeEvent, useState } from 'react';
-
-export type FilterValues = {
-    maxPrice: number;
-    useSemantic: boolean;
-};
 
 type Props = {
     term: string;
-    onChange: (filters: Partial<FilterValues>) => void;
-} & FilterValues;
+    onChange: (filters: Partial<SearchGameParams>) => void;
+} & SearchGameParams;
 
 export default function Filters(props: Props) {
     const { onChange } = props;
@@ -29,6 +26,22 @@ export default function Filters(props: Props) {
 
     const [visible, setVisible] = useState(false);
     const toggleVisible = () => setVisible(!visible);
+
+    const [platforms, setPlatforms] = useState<Platform[]>(
+        props.platforms ?? []
+    );
+    const onPlatformsChange = (evt: ChangeEvent<HTMLInputElement>) => {
+        const selected = evt.target.value as Platform;
+        const newPlatforms = toSelected(selected, platforms);
+
+        // cannot have no platforms selected
+        if (newPlatforms.length === 0) {
+            return;
+        }
+
+        setPlatforms(newPlatforms);
+        onChange({ platforms: newPlatforms });
+    };
 
     return (
         <>
@@ -82,7 +95,52 @@ export default function Filters(props: Props) {
                         </span>
                     </label>
                 </div>
+
+                <div className="flex items-center">
+                    <div className="flex items-center ps-4">
+                        <input
+                            id="bordered-checkbox-1"
+                            type="checkbox"
+                            value="PS4"
+                            name="PS4"
+                            className="w-4 h-4 bg-gray-100 border-gray-600 rounded focus:ring-blue-600 ring-offset-gray-800 focus:ring-2"
+                            onChange={onPlatformsChange}
+                            checked={platforms.includes('PS4')}
+                        />
+                        <label
+                            htmlFor="PS4"
+                            className="w-full py-4 ms-2 text-sm font-medium text-gray-300"
+                        >
+                            PS 4
+                        </label>
+                    </div>
+                    <div className="flex items-center ps-4">
+                        <input
+                            id="bordered-checkbox-1"
+                            type="checkbox"
+                            value="PS5"
+                            name="PS5"
+                            className="w-4 h-4 bg-gray-100 border-gray-600 rounded focus:ring-blue-600 ring-offset-gray-800 focus:ring-2"
+                            onChange={onPlatformsChange}
+                            checked={platforms.includes('PS5')}
+                        />
+                        <label
+                            htmlFor="PS5"
+                            className="w-full py-4 ms-2 text-sm font-medium text-gray-300"
+                        >
+                            PS 5
+                        </label>
+                    </div>
+                </div>
             </div>
         </>
     );
+}
+
+function toSelected(selected: Platform, current: Platform[]): Platform[] {
+    if (current.includes(selected)) {
+        return current.filter((p) => p !== selected);
+    }
+
+    return [...current, selected];
 }

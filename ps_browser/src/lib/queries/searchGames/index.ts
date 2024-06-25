@@ -1,7 +1,7 @@
 'use server';
 
 import { getNatsClient } from '@/lib/connectors/nats';
-import { getPgClient } from '@/lib/connectors/postgres';
+import { GameFilters, Platform, getPgClient } from '@/lib/connectors/postgres';
 import { Game } from '../../connectors/postgres/schema';
 import { logger } from '@/lib/logger';
 
@@ -14,12 +14,13 @@ export type SearchGameParams = {
     orderBy?: OrderBy;
     order?: Order;
     useSemantic?: boolean;
+    platforms?: Platform[];
 };
 
 interface PgClient {
     getGame(params: {
         embedding?: number[];
-        filters?: Record<string, string | number>;
+        filters?: GameFilters;
     }): Promise<Game[]>;
 }
 
@@ -45,8 +46,8 @@ export async function searchGamesQuery(
         embedding = await nats.requestEmbedding(term);
     }
 
-    logger.info({ term }, 'Retrieving game from db');
-    const games = await pg.getGame({ embedding, filters: { maxPrice: 20 } });
+    logger.info({ params }, 'Retrieving game from db');
+    const games = await pg.getGame({ embedding, filters: params });
 
     return games;
 }

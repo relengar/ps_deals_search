@@ -1,14 +1,17 @@
-import { Kysely, LogEvent, PostgresDialect, sql } from 'kysely';
-import { Database } from './schema';
-import { Pool } from 'pg';
 import { logger } from '@/lib/logger';
+import { Kysely, LogEvent, PostgresDialect, sql } from 'kysely';
+import { Pool } from 'pg';
+import { Database } from './schema';
 
 let client: PgClient;
 
 type Pagination = {};
 
+export type Platform = 'PS4' | 'PS5';
+
 export type GameFilters = Pagination & {
     maxPrice?: number;
+    platforms?: Platform[];
 };
 
 type PgConfig = {
@@ -72,6 +75,7 @@ class PgClient {
         await this.#db.destroy();
     }
 
+    // TODO: extract to repository?
     async getGame({
         embedding,
         filters,
@@ -79,10 +83,30 @@ class PgClient {
         embedding?: number[];
         filters: GameFilters;
     }) {
-        let query = this.#db.selectFrom('games');
+        let query = this.#db
+            .selectFrom('games')
+            .select([
+                'games.id',
+                'games.name',
+                'games.description',
+                'games.expiration',
+                'games.rating',
+                'games.rating_sum as ratingSum',
+                'games.price',
+                'games.original_price as originalPrice',
+                'games.url',
+            ]);
 
         if (filters.maxPrice) {
             query = query.where('price', '<=', filters.maxPrice);
+        }
+
+        if (filters.platforms?.length) {
+            query = query.where(
+                'platforms',
+                '<@',
+                sql<string>`ARRAY[${sql.join(filters.platforms)}]`
+            );
         }
 
         if (embedding) {
@@ -95,7 +119,7 @@ class PgClient {
                 );
         }
 
-        query = query.orderBy('rating_sum desc').orderBy('rating desc');
+        query = query.orderBy('ratingSum desc').orderBy('rating desc');
 
         return query.selectAll().execute();
     }

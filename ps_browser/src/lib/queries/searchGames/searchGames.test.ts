@@ -34,7 +34,7 @@ describe('searchGamesQuery', () => {
             mockEmbedding
         );
 
-        expect(games).toHaveProperty('games', [mockGame]);
+        expect(games).to.deep.include(mockGame);
     });
 
     test('Search without a term', async () => {
@@ -42,6 +42,6 @@ describe('searchGamesQuery', () => {
 
         expect(requestEmbedding).not.toHaveBeenCalled();
         expect(getGame).toHaveBeenCalled();
-        expect(games).toHaveProperty('games', [mockGame]);
+        expect(games).to.deep.include(mockGame);
     });
 });
