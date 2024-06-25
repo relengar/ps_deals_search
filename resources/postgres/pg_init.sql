@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS games (
     url text NOT NULL,
     rating real NOT NULL,
     rating_sum int NOT NULL,
-    expiration timestamp
+    expiration timestamp,
+    platforms text[] default '{}'
 );
 
 -- The embedding model we use (all-MiniLM-L6-v2) uses 384 dimensions
