@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 	"github.com/rs/zerolog/log"
 )
 
@@ -41,8 +41,8 @@ func (c *client) Connect() error {
 
 func (c *client) InsertGame(game datatypes.Game) (int, error) {
 	resp, err := c.db.Query(`
-		INSERT INTO games (name, description, price, original_price, url, rating, rating_sum, expiration)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO games (name, description, price, original_price, url, rating, rating_sum, expiration, platforms)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id
 	`,
 		game.Name,
@@ -53,6 +53,7 @@ func (c *client) InsertGame(game datatypes.Game) (int, error) {
 		game.Rating,
 		game.RatingsSum,
 		game.Expiration,
+		pq.Array(game.Platforms),
 	)
 	if err != nil {
 		return 0, err

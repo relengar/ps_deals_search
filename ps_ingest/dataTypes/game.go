@@ -12,4 +12,5 @@ type Game struct {
 	Rating        float32   `json:"rating"`
 	RatingsSum    int       `json:"ratingsNum"`
 	Expiration    time.Time `json:"expiration"`
+	Platforms     []string  `json:"platforms"`
 }

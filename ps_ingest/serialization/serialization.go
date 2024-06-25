@@ -59,7 +59,10 @@ func (s *Serializer) Serialize(game datatypes.Game) {
 	err = s.pgClient.InsertGameEmbedding(gameId, descriptionEmbedding)
 	if err != nil {
 		errLog.Err(err).Int("embedding_length", len(descriptionEmbedding)).Msg("Failed to insert game description embedding to db")
+		return
 	}
+
+	log.Info().Any("game", game).Int("id", gameId).Msg("Finished processing game")
 }
 
 func CreateSerializer(cfg *SerializerConfig) Serializer {

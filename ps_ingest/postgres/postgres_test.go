@@ -30,6 +30,7 @@ func TestPostgresInsert(t *testing.T) {
 				RatingsSum:    10,
 				Expiration:    time.Now(),
 				URL:           "http://batmangame.com",
+				Platforms:     []string{"PS4", "PS5"},
 			},
 		},
 	}
