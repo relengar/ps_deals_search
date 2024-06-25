@@ -19,6 +19,7 @@ type Game struct {
 	Rating        float32   `json:"rating"`
 	RatingsSum    int       `json:"ratingsNum"`
 	Expiration    time.Time `json:"expiration"`
+	Platforms     []string  `json:"platforms"`
 }
 
 type gameCollector struct {
@@ -76,7 +77,10 @@ func createGameCollector(domain string, out chan Game) gameCollector {
 			return
 		}
 
-		game := Game{name, price, currency, originalPrice, url, description, float32(rating), ratingsSum, expiration}
+		platformsText := h.ChildText("dd[data-qa=\"gameInfo#releaseInformation#platform-value\"]")
+		platforms := strings.Split(platformsText, ",")
+
+		game := Game{name, price, currency, originalPrice, url, description, float32(rating), ratingsSum, expiration, platforms}
 
 		log.Info().Any("game", game).Msg("Collected game")
 		out <- game
