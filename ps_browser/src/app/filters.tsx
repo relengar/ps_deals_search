@@ -1,6 +1,6 @@
 import { FiltersIcon } from '@/components/icons/filtersIcon';
-import type { Platform } from '@/lib/connectors/postgres';
 import { SearchGameParams } from '@/lib/queries/searchGames';
+import type { Platform } from '@/lib/repositories/games';
 import { ChangeEvent, useState } from 'react';
 
 type Props = {

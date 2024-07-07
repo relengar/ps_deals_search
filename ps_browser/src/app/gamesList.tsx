@@ -1,8 +1,8 @@
-import { Game } from '@/lib/connectors/postgres/schema';
-import GameItem from './gameItem';
+import { GameResponse } from '@/lib/repositories/games';
 import { Fragment } from 'react';
+import GameItem from './gameItem';
 
-export default function GamesList({ games }: { games: Game[] }) {
+export default function GamesList({ games }: { games: GameResponse[] }) {
     return (
         <section className="container mx-auto space-y-10">
             {games.map((game) => (

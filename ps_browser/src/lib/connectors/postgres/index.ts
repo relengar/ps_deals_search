@@ -1,18 +1,9 @@
 import { logger } from '@/lib/logger';
-import { Kysely, LogEvent, PostgresDialect, sql } from 'kysely';
+import { Kysely, LogEvent, PostgresDialect } from 'kysely';
 import { Pool } from 'pg';
 import { Database } from './schema';
 
 let client: PgClient;
-
-type Pagination = {};
-
-export type Platform = 'PS4' | 'PS5';
-
-export type GameFilters = Pagination & {
-    maxPrice?: number;
-    platforms?: Platform[];
-};
 
 type PgConfig = {
     user: string;
@@ -24,7 +15,7 @@ type PgConfig = {
     logQueries: boolean;
 };
 
-class PgClient {
+export class PgClient {
     #db: Kysely<Database>;
     #logQueries: boolean;
 
@@ -75,53 +66,8 @@ class PgClient {
         await this.#db.destroy();
     }
 
-    // TODO: extract to repository?
-    async getGame({
-        embedding,
-        filters,
-    }: {
-        embedding?: number[];
-        filters: GameFilters;
-    }) {
-        let query = this.#db
-            .selectFrom('games')
-            .select([
-                'games.id',
-                'games.name',
-                'games.description',
-                'games.expiration',
-                'games.rating',
-                'games.rating_sum as ratingSum',
-                'games.price',
-                'games.original_price as originalPrice',
-                'games.url',
-            ]);
-
-        if (filters.maxPrice) {
-            query = query.where('price', '<=', filters.maxPrice);
-        }
-
-        if (filters.platforms?.length) {
-            query = query.where(
-                'platforms',
-                '<@',
-                sql<string>`ARRAY[${sql.join(filters.platforms)}]`
-            );
-        }
-
-        if (embedding) {
-            query = query
-                .innerJoin('game_embeddings', 'game_id', 'games.id')
-                .orderBy(
-                    sql`${sql.ref(
-                        'game_embeddings.embedding'
-                    )} <=> ${JSON.stringify(embedding)}`
-                );
-        }
-
-        query = query.orderBy('ratingSum desc').orderBy('rating desc');
-
-        return query.selectAll().execute();
+    get db() {
+        return this.#db;
     }
 }
 

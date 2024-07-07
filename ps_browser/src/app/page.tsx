@@ -2,9 +2,8 @@
 
 import Button from '@/components/button';
 import SearchIcon from '@/components/icons/searchIcon';
-import { Platform } from '@/lib/connectors/postgres';
-import { Game } from '@/lib/connectors/postgres/schema';
 import { SearchGameParams, searchGames } from '@/lib/queries/searchGames';
+import { GameResponse, Platform } from '@/lib/repositories/games';
 import { parseArrayParam } from '@/lib/utils/url';
 import { ChangeEvent, useEffect, useReducer, useState } from 'react';
 import Spinner from '../components/spinner';
@@ -46,7 +45,7 @@ export default function Search({ searchParams }: { searchParams: UrlQuery }) {
     };
 
     const [loading, setLoading] = useState(true);
-    const [games, setGames] = useState<Game[]>([]);
+    const [games, setGames] = useState<GameResponse[]>([]);
 
     const search = () => {
         if (term.length === 0) {

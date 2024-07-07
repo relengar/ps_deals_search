@@ -1,6 +1,6 @@
-import { Game } from '@/lib/connectors/postgres/schema';
+import { GameResponse } from '@/lib/repositories/games';
 
-export default function GameItem({ game }: { game: Game }) {
+export default function GameItem({ game }: { game: GameResponse }) {
     return (
         <div className="shadow-md w-full text-center rounded-sm border-slate-500 rounded-md p-3">
             <div>
@@ -12,13 +12,13 @@ export default function GameItem({ game }: { game: Game }) {
                 <span>
                     Price: <span>{game.price}</span>&nbsp;/&nbsp;
                     <span className="line-through text-slate-400">
-                        {game.original_price}
+                        {game.originalPrice}
                     </span>
                 </span>
                 <span>
                     Rating: {game.rating}&nbsp;
                     <span className="text-slate-400">
-                        (of {game.rating_sum})
+                        (of {game.ratingSum})
                     </span>
                 </span>
             </div>

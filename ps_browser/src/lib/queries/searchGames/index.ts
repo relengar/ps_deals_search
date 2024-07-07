@@ -1,9 +1,13 @@
 'use server';
 
 import { getNatsClient } from '@/lib/connectors/nats';
-import { GameFilters, Platform, getPgClient } from '@/lib/connectors/postgres';
-import { Game } from '../../connectors/postgres/schema';
 import { logger } from '@/lib/logger';
+import {
+    GameFilters,
+    GameResponse,
+    Platform,
+    getGamesRepo,
+} from '@/lib/repositories/games';
 
 type OrderBy = 'price' | 'rating';
 type Order = 'ASC' | 'DESC';
@@ -17,11 +21,11 @@ export type SearchGameParams = {
     platforms?: Platform[];
 };
 
-interface PgClient {
-    getGame(params: {
+interface GamesRepo {
+    getGames(params: {
         embedding?: number[];
         filters?: GameFilters;
-    }): Promise<Game[]>;
+    }): Promise<GameResponse[]>;
 }
 
 interface NatsClient {
@@ -29,7 +33,7 @@ interface NatsClient {
 }
 
 type Dependencies = {
-    pg: PgClient;
+    gamesRepo: GamesRepo;
     nats: NatsClient;
 };
 
@@ -37,7 +41,7 @@ export async function searchGamesQuery(
     deps: Dependencies,
     params: SearchGameParams
 ) {
-    const { pg, nats } = deps;
+    const { gamesRepo, nats } = deps;
     const { term } = params;
     let embedding: number[] | undefined = undefined;
 
@@ -47,14 +51,14 @@ export async function searchGamesQuery(
     }
 
     logger.info({ params }, 'Retrieving game from db');
-    const games = await pg.getGame({ embedding, filters: params });
+    const games = await gamesRepo.getGames({ embedding, filters: params });
 
     return games;
 }
 
 export const searchGames = async (params: SearchGameParams) => {
-    const pg = getPgClient();
+    const gamesRepo = getGamesRepo();
     const nats = await getNatsClient();
 
-    return searchGamesQuery({ pg, nats }, params);
+    return searchGamesQuery({ gamesRepo, nats }, params);
 };

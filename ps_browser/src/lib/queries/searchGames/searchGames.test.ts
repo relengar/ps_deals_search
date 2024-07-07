@@ -4,23 +4,23 @@ import { searchGamesQuery } from '.';
 
 describe('searchGamesQuery', () => {
     let deps: Parameters<typeof searchGamesQuery>[0];
-    let getGame: Mock;
+    let getGames: Mock;
     let requestEmbedding: Mock;
 
     const mockEmbedding = [0.12321, 0.3123, 0.312321];
     const mockGame = { name: 'game' };
 
     beforeAll(async () => {
-        getGame = vi.fn().mockReturnValue([mockGame]);
+        getGames = vi.fn().mockReturnValue([mockGame]);
         requestEmbedding = vi.fn().mockReturnValue(mockEmbedding);
         deps = {
-            pg: { getGame },
+            gamesRepo: { getGames },
             nats: { requestEmbedding },
         };
     });
 
     afterEach(() => {
-        getGame.mockClear();
+        getGames.mockClear();
         requestEmbedding.mockClear();
     });
 
@@ -29,7 +29,7 @@ describe('searchGamesQuery', () => {
         const games = await searchGamesQuery(deps, { term });
 
         expect(requestEmbedding).toHaveBeenCalledWith(term);
-        expect(getGame.mock.lastCall[0]).toHaveProperty(
+        expect(getGames.mock.lastCall[0]).toHaveProperty(
             'embedding',
             mockEmbedding
         );
@@ -41,7 +41,7 @@ describe('searchGamesQuery', () => {
         const games = await searchGamesQuery(deps, {});
 
         expect(requestEmbedding).not.toHaveBeenCalled();
-        expect(getGame).toHaveBeenCalled();
+        expect(getGames).toHaveBeenCalled();
         expect(games).to.deep.include(mockGame);
     });
 });
