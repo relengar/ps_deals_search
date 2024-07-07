@@ -42,7 +42,7 @@ export class NatsClient {
             this.#getEmbeddingSubject,
             JSON.stringify([text]),
             {
-                timeout: 5 * 1000,
+                timeout: 8 * 1000,
             }
         );
         const resp: EmbeddingResponse = msg.json();
