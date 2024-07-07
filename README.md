@@ -71,7 +71,13 @@ docker compose -f resources/docker-compose.dev.yaml logs -f --tail 250 [service_
 After you're done it's best to stop and cleanup the resources.
 
 ```shell
-docker compose -f resources/docker-compose.dev.yaml down -v
+docker compose -f resources/docker-compose.dev.yaml down -v && sudo rm -rf resources/postgres/data
+```
+
+Teardown with perserving database state
+
+```shell
+docker compose -f resources/docker-compose.dev.yaml down
 ```
 
 There's not migration mechanism (yet). To update postgres schema see `resources/pg_init.sql`
