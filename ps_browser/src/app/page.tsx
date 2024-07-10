@@ -3,9 +3,11 @@
 import Button from '@/components/button';
 import SearchIcon from '@/components/icons/searchIcon';
 import { SearchGameParams, searchGames } from '@/lib/queries/searchGames';
-import { GameResponse, Platform } from '@/lib/repositories/games';
-import { parseArrayParam } from '@/lib/utils/url';
+import { GameResponse } from '@/lib/repositories/games';
+import { Platform } from '@/lib/repositories/games/schema';
+import { parseArrayParam, parseUrlNumber } from '@/lib/utils/url';
 import { ChangeEvent, useEffect, useReducer, useState } from 'react';
+import Pagination from '../components/pagination';
 import Spinner from '../components/spinner';
 import Filters from './filters';
 import GamesList from './gamesList';
@@ -16,23 +18,26 @@ type UrlQuery = {
     maxPrice?: string;
     useSemantic?: string;
     platforms?: string;
+    page?: string;
+    limit?: string;
 };
 
 export default function Search({ searchParams }: { searchParams: UrlQuery }) {
+    const [totalGames, setTotalGames] = useState<number | null>(null);
     const [term, setTerm] = useState(searchParams.term ?? '');
     const onTermChange = (evt: ChangeEvent<HTMLInputElement>) =>
         setTerm(evt.target.value);
 
-    const defaultMaxPrice = 20;
-    const maxPrice = searchParams.maxPrice
-        ? Number(searchParams.maxPrice)
-        : defaultMaxPrice;
+    const maxPrice = parseUrlNumber(searchParams.maxPrice, 20);
     const useSemantic = searchParams.useSemantic === 'true';
 
     const platforms = parseArrayParam<Platform>(searchParams.platforms, [
         'PS4',
         'PS5',
     ]);
+
+    let page = parseUrlNumber(searchParams.page, 0);
+    const limit = parseUrlNumber(searchParams.limit, 20);
 
     const [filters, dispatchFilters] = useReducer(FiltersReducer, {
         maxPrice,
@@ -52,13 +57,24 @@ export default function Search({ searchParams }: { searchParams: UrlQuery }) {
             dispatchFilters({ useSemantic: false });
         }
 
-        goToSearch({ term, ...filters });
+        goToSearch({ term, ...filters, page, limit });
+    };
+
+    const onPageSelect = (selected: number) => {
+        page = selected;
+        search();
     };
 
     useEffect(() => {
         const getGames = async () => {
             setLoading(true);
-            const result = await searchGames({ term, ...filters });
+            const { games: result, total } = await searchGames({
+                term,
+                ...filters,
+                page,
+                limit,
+            });
+            setTotalGames(total);
             setGames(result);
             setLoading(false);
         };
@@ -97,6 +113,14 @@ export default function Search({ searchParams }: { searchParams: UrlQuery }) {
             </section>
             {loading && <Spinner />}
             <GamesList games={games} />
+            {totalGames && totalGames - limit > 0 && (
+                <Pagination
+                    limit={limit}
+                    total={totalGames}
+                    page={page}
+                    onChange={onPageSelect}
+                />
+            )}
         </section>
     );
 }

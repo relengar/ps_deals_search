@@ -1,11 +1,10 @@
-import { sql } from 'kysely';
 import { PgClient, getPgClient } from '@/lib/connectors/postgres';
+import { Database } from '@/lib/connectors/postgres/schema';
+import { SelectQueryBuilder, sql } from 'kysely';
+import { Pagination } from '../schema';
+import { Platform } from './schema';
 
 let gamesRepo: GamesRepository;
-
-type Pagination = {};
-
-export type Platform = 'PS4' | 'PS5';
 
 export type GameFilters = Pagination & {
     maxPrice?: number;
@@ -24,6 +23,11 @@ export type GameResponse = {
     originalPrice: number;
 };
 
+type GameFilterParams = {
+    filters: GameFilters;
+    embedding?: number[];
+};
+
 class GamesRepository {
     #pg: PgClient;
     constructor(pg: PgClient) {
@@ -34,25 +38,13 @@ class GamesRepository {
         return this.#pg.db.selectFrom('games');
     }
 
-    async getGames({
+    #applyGameFilters<T>({
+        query,
         embedding,
         filters,
-    }: {
-        embedding?: number[];
-        filters: GameFilters;
-    }): Promise<GameResponse[]> {
-        let query = this.#query().select([
-            'games.id',
-            'games.name',
-            'games.description',
-            'games.expiration',
-            'games.rating',
-            'games.rating_sum as ratingSum',
-            'games.price',
-            'games.original_price as originalPrice',
-            'games.url',
-        ]);
-
+    }: GameFilterParams & {
+        query: SelectQueryBuilder<Database, 'games', T>;
+    }) {
         if (filters.maxPrice) {
             query = query.where('price', '<=', filters.maxPrice);
         }
@@ -75,9 +67,43 @@ class GamesRepository {
                 );
         }
 
+        return query;
+    }
+
+    async getGames({
+        embedding,
+        filters,
+    }: GameFilterParams): Promise<GameResponse[]> {
+        let query = this.#query().select([
+            'games.id',
+            'games.name',
+            'games.description',
+            'games.expiration',
+            'games.rating',
+            'games.rating_sum as ratingSum',
+            'games.price',
+            'games.original_price as originalPrice',
+            'games.url',
+        ]);
+
+        query = this.#applyGameFilters({ query, embedding, filters });
+
         query = query.orderBy('ratingSum desc').orderBy('rating desc');
 
+        query = query.limit(filters.limit).offset(filters.page * filters.limit);
+
         return query.execute();
+    }
+
+    async countGames({ embedding, filters }: GameFilterParams) {
+        let query = this.#query().select((g) =>
+            g.fn.count<number>('games.id').as('games_total')
+        );
+
+        query = this.#applyGameFilters({ query, embedding, filters });
+
+        const { games_total } = await query.executeTakeFirstOrThrow();
+        return games_total;
     }
 }
 

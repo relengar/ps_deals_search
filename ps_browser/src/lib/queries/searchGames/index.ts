@@ -1,31 +1,42 @@
 'use server';
 
+import z from 'zod';
+
 import { getNatsClient } from '@/lib/connectors/nats';
 import { logger } from '@/lib/logger';
 import {
     GameFilters,
     GameResponse,
-    Platform,
     getGamesRepo,
 } from '@/lib/repositories/games';
+import { platformsSchema } from '@/lib/repositories/games/schema';
+import { orderSchema, paginationSchema } from '@/lib/repositories/schema';
 
-type OrderBy = 'price' | 'rating';
-type Order = 'ASC' | 'DESC';
+const orderBy = ['price', 'rating'] as const;
+const orderBySchema = z.enum(orderBy);
 
-export type SearchGameParams = {
-    term?: string;
-    maxPrice?: number;
-    orderBy?: OrderBy;
-    order?: Order;
-    useSemantic?: boolean;
-    platforms?: Platform[];
-};
+const searchParamsSchema = z.object({
+    term: z.string().optional(),
+    maxPrice: z.number().optional(),
+    orderBy: orderBySchema.optional(),
+    order: orderSchema.optional(),
+    useSemantic: z.boolean().optional(),
+    platforms: platformsSchema.array().optional(),
+});
+export type SearchGameParams = z.infer<typeof searchParamsSchema>;
+
+const allSearchParamsSchema = searchParamsSchema.merge(paginationSchema);
+type SearchParams = z.infer<typeof allSearchParamsSchema>;
 
 interface GamesRepo {
     getGames(params: {
         embedding?: number[];
         filters?: GameFilters;
     }): Promise<GameResponse[]>;
+    countGames(params: {
+        embedding?: number[];
+        filters?: GameFilters;
+    }): Promise<number>;
 }
 
 interface NatsClient {
@@ -39,7 +50,7 @@ type Dependencies = {
 
 export async function searchGamesQuery(
     deps: Dependencies,
-    params: SearchGameParams
+    params: SearchParams
 ) {
     const { gamesRepo, nats } = deps;
     const { term } = params;
@@ -50,13 +61,18 @@ export async function searchGamesQuery(
         embedding = await nats.requestEmbedding(term);
     }
 
-    logger.info({ params }, 'Retrieving game from db');
-    const games = await gamesRepo.getGames({ embedding, filters: params });
+    const filters = allSearchParamsSchema.parse(params);
+    logger.info({ params, filters }, 'Retrieving game from db');
+    const searchParams = { embedding, filters };
+    const [games, total] = await Promise.all([
+        gamesRepo.getGames(searchParams),
+        gamesRepo.countGames(searchParams),
+    ]);
 
-    return games;
+    return { games, total };
 }
 
-export const searchGames = async (params: SearchGameParams) => {
+export const searchGames = async (params: SearchParams) => {
     const gamesRepo = getGamesRepo();
     const nats = await getNatsClient();
 

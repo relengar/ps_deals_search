@@ -30,3 +30,15 @@ export function parseArrayParam<T extends string>(
 
     return defaultValue;
 }
+
+export function parseUrlNumber(
+    value?: string,
+    defaultValue: number = 0
+): number {
+    if (!value) {
+        return defaultValue;
+    }
+
+    const num = Number(value);
+    return isNaN(num) ? defaultValue : num;
+}

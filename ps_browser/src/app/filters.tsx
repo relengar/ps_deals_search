@@ -1,12 +1,12 @@
 import { FiltersIcon } from '@/components/icons/filtersIcon';
 import { SearchGameParams } from '@/lib/queries/searchGames';
-import type { Platform } from '@/lib/repositories/games';
+import { Platform } from '@/lib/repositories/games/schema';
 import { ChangeEvent, useState } from 'react';
 
 type Props = {
     term: string;
     onChange: (filters: Partial<SearchGameParams>) => void;
-} & SearchGameParams;
+} & Omit<SearchGameParams, 'limit' | 'page'>;
 
 export default function Filters(props: Props) {
     const { onChange } = props;

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { parseArrayParam, toQueryString } from './url';
+import { parseArrayParam, parseUrlNumber, toQueryString } from './url';
 
 describe('utils:url', () => {
     describe('toQueryString', () => {
@@ -61,6 +61,23 @@ describe('utils:url', () => {
             const parsed = parseArrayParam(undefined, expectedArray);
 
             expect(parsed).toEqual(expectedArray);
+        });
+    });
+
+    describe('parseUrlNumber', () => {
+        test('parse valid number', () => {
+            const number = parseUrlNumber('10');
+            expect(number).toEqual(10);
+        });
+
+        test('use default on missing param', () => {
+            const number = parseUrlNumber(undefined, 10);
+            expect(number).toEqual(10);
+        });
+
+        test('use default on invalid param', () => {
+            const number = parseUrlNumber('Not a number', 10);
+            expect(number).toEqual(10);
         });
     });
 });
